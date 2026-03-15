@@ -57,9 +57,8 @@ jobs:
               mc_version=$(basename "$version_dir")
               for jar in "${version_dir}build/libs/MinecraftAuth-Forge"*.jar; do
                 if [ -f "$jar" ]; then
-                  filename=$(basename "$jar")
                   # Rename to include MC version for clarity
-                  new_name="${filename%.jar}-MC${mc_version}.jar"
+                  new_name="MinecraftAuth-Forge-MC${mc_version}.jar"
                   cp "$jar" "release-artifacts/$new_name"
                 fi
               done
@@ -98,9 +97,8 @@ jobs:
               mc_version=$(basename "$version_dir")
               for jar in "${version_dir}build/libs/MinecraftAuth-NeoForge"*.jar; do
                 if [ -f "$jar" ]; then
-                  filename=$(basename "$jar")
                   # Rename to include MC version for clarity
-                  new_name="${filename%.jar}-MC${mc_version}.jar"
+                  new_name="MinecraftAuth-NeoForge-MC${mc_version}.jar"
                   cp "$jar" "release-artifacts/$new_name"
                 fi
               done
@@ -138,9 +136,9 @@ jobs:
           #### Forge Mods
           | Minecraft Version | File |
           |-------------------|------|
-          | 1.18.2 | `MinecraftAuth-Forge*-MC1.18.2.jar` |
-          | 1.20.1 | `MinecraftAuth-Forge*-MC1.20.1.jar` |
-          | 1.21.1 | `MinecraftAuth-Forge*-MC1.21.1.jar` |
+          | 1.18.2 | `MinecraftAuth-Forge-MC1.18.2.jar` |
+          | 1.20.1 | `MinecraftAuth-Forge-MC1.20.1.jar` |
+          | 1.21.1 | `MinecraftAuth-Forge-MC1.21.1.jar` |
 
           #### Fabric Mods
           | Minecraft Version | File |
@@ -151,7 +149,7 @@ jobs:
           #### NeoForge Mods
           | Minecraft Version | File |
           |-------------------|------|
-          | 1.21.1 | `MinecraftAuth-NeoForge*-MC1.21.1.jar` |
+          | 1.21.1 | `MinecraftAuth-NeoForge-MC1.21.1.jar` |
 
           #### Proxy Plugins
           | Platform | File |
