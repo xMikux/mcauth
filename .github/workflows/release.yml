@@ -50,18 +50,19 @@ jobs:
           mkdir -p release-artifacts
 
           # Bukkit
-          cp server/bukkit/build/libs/MinecraftAuth-Bukkit*.jar release-artifacts/ 2>/dev/null || true
+          cp server/bukkit/build/libs/MinecraftAuth-Bukkit.jar release-artifacts/ 2>/dev/null || true
 
           # Forge (all versions)
           for version_dir in server/forge/*/; do
             if [ -d "$version_dir" ]; then
               mc_version=$(basename "$version_dir")
               for jar in "${version_dir}build/libs/MinecraftAuth-Forge"*.jar; do
-                if [ -f "$jar" ]; then
-                  # Rename to include MC version for clarity
-                  new_name="MinecraftAuth-Forge-MC${mc_version}.jar"
-                  cp "$jar" "release-artifacts/$new_name"
-                fi
+                [ -f "$jar" ] || continue
+                fname=$(basename "$jar")
+                [[ "$fname" == *"-sources.jar" ]] && continue
+                new_name="MinecraftAuth-Forge-MC${mc_version}.jar"
+                cp "$jar" "release-artifacts/$new_name"
+                break
               done
             fi
           done
@@ -70,19 +71,14 @@ jobs:
           for version_dir in server/fabric/*/; do
             if [ -d "$version_dir" ]; then
               mc_version=$(basename "$version_dir")
-              # Prefer Universal (fat jar) if it exists, otherwise use plain jar
               jar=""
               for candidate in "${version_dir}build/libs/MinecraftAuth-Fabric"*.jar; do
                 [ -f "$candidate" ] || continue
                 fname=$(basename "$candidate")
                 [[ "$fname" == *"-dev.jar" ]] && continue
                 [[ "$fname" == *"-sources.jar" ]] && continue
-                if [[ "$fname" == *"Universal"* ]]; then
-                  jar="$candidate"
-                  break
-                elif [ -z "$jar" ]; then
-                  jar="$candidate"
-                fi
+                jar="$candidate"
+                break
               done
               if [ -n "$jar" ]; then
                 filename=$(basename "$jar")
@@ -97,20 +93,18 @@ jobs:
             if [ -d "$version_dir" ]; then
               mc_version=$(basename "$version_dir")
               for jar in "${version_dir}build/libs/MinecraftAuth-NeoForge"*.jar; do
-                if [ -f "$jar" ]; then
-                  # Rename to include MC version for clarity
-                  new_name="MinecraftAuth-NeoForge-MC${mc_version}.jar"
-                  cp "$jar" "release-artifacts/$new_name"
-                fi
+                [ -f "$jar" ] || continue
+                fname=$(basename "$jar")
+                [[ "$fname" == *"-sources.jar" ]] && continue
+                new_name="MinecraftAuth-NeoForge-MC${mc_version}.jar"
+                cp "$jar" "release-artifacts/$new_name"
+                break
               done
             fi
           done
 
           # Velocity
-          cp proxy/velocity/build/libs/MinecraftAuth-Velocity*.jar release-artifacts/ 2>/dev/null || true
-
-          # Remove sources jars from release
-          rm -f release-artifacts/*-sources.jar
+          cp proxy/velocity/build/libs/MinecraftAuth-Velocity.jar release-artifacts/ 2>/dev/null || true
 
           # List all artifacts
           echo "## Release Artifacts"
@@ -132,7 +126,7 @@ jobs:
           #### Server Plugins
           | Platform | Supported Versions | File |
           |----------|--------------------|------|
-          | **Bukkit / Spigot / Paper** | 1.16.5+ | `MinecraftAuth-Bukkit*.jar` |
+          | **Bukkit / Spigot / Paper** | 1.16.5+ | `MinecraftAuth-Bukkit.jar` |
 
           #### Forge Mods
           | Minecraft Version | File |
@@ -144,8 +138,8 @@ jobs:
           #### Fabric Mods
           | Minecraft Version | File |
           |-------------------|------|
-          | 1.21.1 | `MinecraftAuth-Fabric-Universal*-MC1.21.1.jar` |
-          | 1.21.11 | `MinecraftAuth-Fabric*-MC1.21.11.jar` |
+          | 1.21.1 | `MinecraftAuth-Fabric-MC1.21.1.jar` |
+          | 1.21.11 | `MinecraftAuth-Fabric-MC1.21.11.jar` |
 
           #### NeoForge Mods
           | Minecraft Version | File |
@@ -155,7 +149,7 @@ jobs:
           #### Proxy Plugins
           | Platform | File |
           |----------|------|
-          | **Velocity** | `MinecraftAuth-Velocity*.jar` |
+          | **Velocity** | `MinecraftAuth-Velocity.jar` |
 
           ---
           > This release is automatically updated on every push to `devel`.
