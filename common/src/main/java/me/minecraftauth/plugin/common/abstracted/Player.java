@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public abstract class Player {
             case PATREON:
             case TWITCH:
             case GOOGLE:
-                AuthService.lookup(AccountType.MINECRAFT, getUUID(), type);
+                return AuthService.lookup(AccountType.MINECRAFT, getUUID(), type).orElse(null);
             default:
                 throw new IllegalArgumentException("Invalid account type to lookup: " + type.name().toLowerCase());
         }
@@ -42,7 +42,8 @@ public abstract class Player {
 
     @Override
     public boolean equals(Object obj) {
-        return obj.getClass().equals(getClass()) && getUUID().equals(((Player) obj).getUUID());
+        if (obj == null || obj.getClass() != getClass()) return false;
+        return getUUID().equals(((Player) obj).getUUID());
     }
 
 }

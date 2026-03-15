@@ -2,6 +2,7 @@ name: MinecraftAuth
 version: @VERSION@
 main: me.minecraftauth.plugin.bukkit.MinecraftAuthBukkit
 api-version: 1.13
+folia-supported: true
 authors: [ MinecraftAuth ]
 description: Authenticate players in your Minecraft server to various services
 website: https://minecraftauth.me

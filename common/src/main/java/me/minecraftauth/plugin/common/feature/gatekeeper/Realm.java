@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,15 @@ import me.minecraftauth.lib.account.platform.minecraft.MinecraftAccount;
 import me.minecraftauth.plugin.common.feature.gatekeeper.function.AbstractFunction;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Realm {
 
     @Getter private final GatekeeperFeature gatekeeper;
     @Getter private final String server;
     @Getter private final String kickMessage;
-    @Getter private final List<Expression> expressions = new LinkedList<>();
+    @Getter private final List<Expression> expressions = new CopyOnWriteArrayList<>();
 
     protected Realm(GatekeeperFeature gatekeeper, Dynamic config, String server) {
         this.gatekeeper = gatekeeper;
@@ -50,15 +49,18 @@ public class Realm {
     }
 
     public GatekeeperResult verify(MinecraftAccount account) {
-        boolean first = true;
         for (Expression expression : expressions) {
-            if (expression.eval().compareTo(BigDecimal.ONE) == 0) {
+            // EvalEx Expression instances are NOT thread-safe.
+            // Create a temporary expression for this evaluation to ensure thread safety.
+            com.udojava.evalex.Expression evalInstance = new com.udojava.evalex.Expression(expression.getOriginalExpression());
+            for (AbstractFunction function : gatekeeper.getFunctions()) evalInstance.addLazyFunction(function);
+            for (Operator operator : gatekeeper.getOperators()) evalInstance.addOperator(operator);
+
+            if (evalInstance.eval().compareTo(BigDecimal.ONE) == 0) {
                 gatekeeper.getService().getLogger().info("[Gatekeeper] " + account + (server != null ? "@" + server : "") + " is being allowed via [" + expression.getOriginalExpression() + "]");
                 expression.incrementSuccessCount();
-                if (!first) expressions.sort(Comparator.comparingInt(value -> -value.successCount));
                 return new GatekeeperResult(GatekeeperResult.Type.ALLOWED);
             }
-            first = false;
         }
         return new GatekeeperResult(GatekeeperResult.Type.DENIED, kickMessage);
     }

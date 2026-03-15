@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ public class AuthenticationService {
     @Getter private final DynamicConfig config;
     @Getter private final Logger logger;
     @Getter private final GatekeeperFeature gatekeeperFeature;
-    @Getter private String serverToken;
+    @Getter private volatile String serverToken;
 
     private AuthenticationService(DynamicConfig config, Logger logger) throws IOException, ParseException {
         this.config = config;
         this.logger = logger;
-        this.gatekeeperFeature = new GatekeeperFeature(this);
         reload();
+        this.gatekeeperFeature = new GatekeeperFeature(this);
 
         logger.info("Minecraft Authentication service ready");
     }

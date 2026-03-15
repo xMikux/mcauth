@@ -1,6 +1,6 @@
 plugins {
-    id 'io.freefair.lombok' version '5.3.3.3'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'io.freefair.lombok' version '8.11'
+    id 'com.gradleup.shadow' version '8.3.5'
     id 'org.cadixdev.licenser' version '0.6.1'
 }
 
@@ -11,12 +11,17 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.freefair.lombok'
-    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'com.gradleup.shadow'
     apply plugin: 'org.cadixdev.licenser'
 
-    java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
-    generateLombokConfig.enabled = false
+    tasks.configureEach {
+        if (name == 'generateLombokConfig') {
+            enabled = false
+        }
+    }
 
     repositories {
         mavenCentral()
@@ -28,6 +33,19 @@ subprojects {
     configurations {
         shaded
         implementation.extendsFrom(shaded)
+    }
+
+    dependencies {
+        if (project.name != 'common') {
+            shaded project(':common')
+        }
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+        testImplementation 'org.mockito:mockito-core:5.14.2'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     jar {
@@ -42,22 +60,19 @@ subprojects {
         relocate 'com.udojava.evalex', 'me.minecraftauth.lib.evalex'
         relocate 'com.github.benmanes.caffeine', 'me.minecraftauth.lib.caffeine'
 
-        //noinspection GroovyAssignabilityCheck
-        archiveClassifier = null
+        archiveClassifier.set('')
     }
 
     task sourcesJar(type: Jar, dependsOn: classes) {
         from sourceSets.main.allSource
 
-        //noinspection GroovyAssignabilityCheck
-        archiveClassifier = 'sources'
+        archiveClassifier.set('sources')
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         from javadoc.destinationDir
 
-        //noinspection GroovyAssignabilityCheck
-        archiveClassifier = 'javadoc'
+        archiveClassifier.set('javadoc')
     }
 
 //    artifacts {

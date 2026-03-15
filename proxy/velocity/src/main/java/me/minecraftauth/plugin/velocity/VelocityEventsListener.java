@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,5 @@ public class VelocityEventsListener {
             e.printStackTrace();
         }
     }
-
-
 
 }

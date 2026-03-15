@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,22 @@ package me.minecraftauth.plugin.common.feature.gatekeeper;
 
 import lombok.Getter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Expression extends com.udojava.evalex.Expression {
 
-    @Getter int successCount = 0;
+    private final AtomicInteger successCount = new AtomicInteger(0);
 
     public Expression(String expression) {
         super(expression);
     }
 
     public int incrementSuccessCount() {
-        return ++successCount;
+        return successCount.incrementAndGet();
+    }
+
+    public int getSuccessCount() {
+        return successCount.get();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class BukkitEventsListener implements Listener {
     @EventHandler
     public void onPlayerLoginEvent(AsyncPlayerPreLoginEvent event) {
         try {
-            boolean op = Bukkit.getOperators().stream().anyMatch(offlinePlayer -> offlinePlayer.getUniqueId().equals(event.getUniqueId()));
+            boolean op = Bukkit.getOfflinePlayer(event.getUniqueId()).isOp();
             MinecraftAuthBukkit.getInstance().getService().handleRealmJoinEvent(new RealmJoinEvent(event.getUniqueId(), event.getName(), op, null) {
                 @Override
                 public void disallow(String message) {

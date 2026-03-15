@@ -1,0 +1,63 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.78'
+}
+
+version = "1.21.1"
+group = "me.minecraftauth"
+archivesBaseName = "MinecraftAuth-NeoForge"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+neoForge {
+    version = "21.1.65"
+    
+    parchment {
+        minecraftVersion = "1.21.1"
+        mappingsVersion = "2024.11.17"
+    }
+
+    mods {
+        minecraftauth {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+repositories{
+    mavenCentral()
+}
+
+dependencies {
+    shaded project(':common')
+}
+
+jar {
+    archiveBaseName.set('MinecraftAuth-NeoForge')
+
+    manifest {
+        attributes([
+                "Specification-Title": "minecraftauth",
+                "Specification-Vendor": "minecraftauth",
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"minecraftauth",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "minecraftauth.mixins.json"
+        ])
+    }
+}
+
+shadowJar {
+    exclude 'org/checkerframework/**'
+    exclude 'com/google/errorprone/**'
+    exclude 'module-info.class'
+    exclude 'META-INF/versions/*/module-info.class'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}

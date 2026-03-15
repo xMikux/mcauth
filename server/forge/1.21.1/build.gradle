@@ -1,0 +1,81 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    }
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+}
+
+version = "1.21.1"
+group = "me.minecraftauth"
+archivesBaseName = "${modid}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: 'official', version: '1.21.1'
+    reobf = false
+    copyIdeResources = true
+
+    runs {
+        server {
+            workingDirectory project.file('run')
+            arg "-mixin.config="+archivesBaseName+".mixins.json"
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                minecraftauth {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories{
+    mavenCentral()
+}
+
+dependencies {
+    shaded project(':common')
+    minecraft 'net.minecraftforge:forge:1.21.1-52.0.16'
+    annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
+}
+
+sourceSets {
+    main.resources.srcDirs += 'src/generated/resources'
+}
+
+jar {
+    archivesBaseName = 'MinecraftAuth-Forge'
+
+    manifest {
+        attributes([
+                "Specification-Title": "${modid}",
+                "Specification-Vendor": "minecraftauth",
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"minecraftauth",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "${modid}.mixins.json"
+        ])
+    }
+}
+
+apply plugin: 'org.spongepowered.mixin'
+mixin {
+    add sourceSets.main, "${modid}.refmap.json"
+}

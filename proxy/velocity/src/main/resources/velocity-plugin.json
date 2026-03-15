@@ -1,0 +1,12 @@
+{
+  "id": "minecraftauth",
+  "name": "MinecraftAuth",
+  "version": "${project.version}",
+  "description": "Authenticate players using MinecraftAuth.me",
+  "url": "https://minecraftauth.me",
+  "authors": [
+    "Scarsz"
+  ],
+  "dependencies": [],
+  "main": "me.minecraftauth.plugin.velocity.MinecraftAuthVelocity"
+}

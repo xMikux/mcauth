@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,25 +28,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class GatekeeperFeature extends Feature {
 
     @Getter private final AuthenticationService service;
-    @Getter private final Map<String, Realm> realms = new HashMap<>();
+    @Getter private final Map<String, Realm> realms = new ConcurrentHashMap<>();
 
     @Getter private final Set<AbstractFunction> functions = new HashSet<>();
     @Getter private final Set<Operator> operators = new HashSet<>();
 
-    private final ReentrantLock expressionLock = new ReentrantLock();
-    private MinecraftAccount accountBeingEvaluated = null;
+    private final ThreadLocal<MinecraftAccount> accountBeingEvaluated = new ThreadLocal<>();
 
     public GatekeeperFeature(AuthenticationService service) {
         this.service = service;
 
-        Supplier<MinecraftAccount> supplier = () -> accountBeingEvaluated;
+        Supplier<MinecraftAccount> supplier = accountBeingEvaluated::get;
         this.functions.add(new DiscordRoleFunction(this, supplier));
         this.functions.add(new DiscordServerFunction(this, supplier));
         this.functions.add(new GlimpseSponsorFunction(this, supplier));
@@ -96,11 +94,9 @@ public class GatekeeperFeature extends Feature {
         }
 
         try {
-            if (!expressionLock.tryLock(5, TimeUnit.SECONDS))
-                return new GatekeeperResult(GatekeeperResult.Type.DENIED, "Unable to schedule verification, try again");
-            this.accountBeingEvaluated = account;
+            this.accountBeingEvaluated.set(account);
 
-            Realm realm = realms.get(server);
+            Realm realm = realms.get(server != null ? server : "");
             if (realm != null) {
                 GatekeeperResult result = realm.verify(account);
                 if (result.getType() == GatekeeperResult.Type.DENIED) {
@@ -110,11 +106,8 @@ public class GatekeeperFeature extends Feature {
             } else {
                 return new GatekeeperResult(GatekeeperResult.Type.NOT_ENABLED);
             }
-        } catch (InterruptedException e) {
-            service.getLogger().info("[Gatekeeper] Denying " + account + ", verification was interrupted");
-            return new GatekeeperResult(GatekeeperResult.Type.DENIED, "Verification was interrupted, try again");
         } finally {
-            expressionLock.unlock();
+            accountBeingEvaluated.remove();
         }
     }
 
@@ -124,7 +117,7 @@ public class GatekeeperFeature extends Feature {
 
         Realm superRealm = new Realm(this, service.getConfig().dget("Gatekeeper"), null);
         if (!superRealm.getExpressions().isEmpty()) {
-            realms.put(null, superRealm);
+            realms.put("", superRealm);
         }
 
         Dynamic serversDynamic = service.getConfig().dgetSilent("Gatekeeper.Servers");
@@ -135,15 +128,12 @@ public class GatekeeperFeature extends Feature {
             });
         }
 
-        boolean onlySuper = realms.keySet().stream().allMatch(Objects::isNull);
+        boolean onlySuper = realms.isEmpty() || (realms.size() == 1 && realms.containsKey(""));
         int expressionCount = realms.values().stream().mapToInt(realm -> realm.getExpressions().size()).sum();
 
-        service.getLogger().info(new StringBuilder()
-                .append("[Gatekeeper] Controlling entry ")
-                .append(!onlySuper ? "to " + realms.size() + " realm" + (realms.size() > 1 ? "s" : "") + ", " : "")
-                .append("based on ").append(expressionCount).append(" conditions")
-                .toString()
-        );
+        service.getLogger().info("[Gatekeeper] Controlling entry "
+                + (!onlySuper ? "to " + realms.size() + " realm" + (realms.size() > 1 ? "s" : "") + ", " : "")
+                + "based on " + expressionCount + " conditions");
     }
 
 }

@@ -2,12 +2,18 @@ plugins {
     id 'java-library'
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 configurations {
     api.extendsFrom(shaded)
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations:22.0.0'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.19.0'
 
     shaded 'me.minecraftauth:lib:1.1.1'
     shaded 'github.scarsz:configuralize:1.4.0'

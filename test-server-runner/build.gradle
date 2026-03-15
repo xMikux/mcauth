@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
+    implementation 'commons-io:commons-io:2.18.0'
+}
+
+test {
+    // Exclude E2E tests from the standard `build` lifecycle.
+    // Run explicitly via: ./gradlew :test-server-runner:test
+    onlyIf {
+        gradle.startParameter.taskNames.any { it == 'test' || it.endsWith(':test') }
+    }
+
+    useJUnitPlatform()
+
+    // Calculate dynamic parallelism: 1GB per server, reserve 2GB for OS and Gradle
+    long totalMemoryBytes = ((com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean()).getTotalMemorySize()
+    long totalMemoryGb = totalMemoryBytes / (1024L * 1024L * 1024L)
+    int maxConcurrentByMemory = (int) Math.max(1L, totalMemoryGb - 2L)
+    int calculatedParallelism = Math.min(Runtime.getRuntime().availableProcessors(), maxConcurrentByMemory)
+
+    // Hard cap at 6 to prevent extreme IO contention on high-end machines
+    calculatedParallelism = Math.min(6, calculatedParallelism)
+
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'true'
+    systemProperty 'junit.jupiter.execution.parallel.mode.default', 'concurrent'
+    systemProperty 'junit.jupiter.execution.parallel.mode.classes.default', 'concurrent'
+    systemProperty 'junit.jupiter.execution.parallel.config.strategy', 'fixed'
+    systemProperty 'junit.jupiter.execution.parallel.config.fixed.parallelism', String.valueOf(calculatedParallelism)
+
+    // Ensure JARs are built before tests run
+    dependsOn ':server:bukkit:shadowJar'
+    dependsOn ':proxy:velocity:shadowJar'
+    dependsOn ':server:fabric:1.21.1:remapJar'
+    dependsOn ':server:fabric:1.21.11:remapJar'
+    dependsOn ':server:forge:1.21.1:shadowJar'
+    dependsOn ':server:neoforge:1.21.1:shadowJar'
+
+    // Pass the project build directory to tests so they can find the jars
+    systemProperty "rootDir", project.rootDir.absolutePath
+
+    // Load .env file from project root if present
+    def envFile = rootProject.file('.env')
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            def trimmed = line.trim()
+            if (trimmed && !trimmed.startsWith('#')) {
+                def idx = trimmed.indexOf('=')
+                if (idx > 0) {
+                    def key = trimmed.substring(0, idx).trim()
+                    def value = trimmed.substring(idx + 1).trim()
+                    environment(key, value)
+                }
+            }
+        }
+    }
+}

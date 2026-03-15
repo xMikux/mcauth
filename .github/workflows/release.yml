@@ -1,0 +1,182 @@
+name: Release
+
+on:
+  push:
+    branches: [devel]
+    paths:
+      - '**/*.java'
+      - '**/*.gradle'
+      - '**/*.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/wrapper/**'
+      - 'settings.gradle'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Build & Release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java (21 runs Gradle)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build all modules
+        run: ./gradlew build --no-daemon
+
+      - name: Run E2E tests
+        run: ./gradlew :test-server-runner:test --no-daemon
+
+      - name: Prepare release artifacts
+        id: prepare
+        run: |
+          mkdir -p release-artifacts
+
+          # Bukkit
+          cp server/bukkit/build/libs/MinecraftAuth-Bukkit*.jar release-artifacts/ 2>/dev/null || true
+
+          # Forge (all versions)
+          for version_dir in server/forge/*/; do
+            if [ -d "$version_dir" ]; then
+              mc_version=$(basename "$version_dir")
+              for jar in "${version_dir}build/libs/MinecraftAuth-Forge"*.jar; do
+                if [ -f "$jar" ]; then
+                  filename=$(basename "$jar")
+                  # Rename to include MC version for clarity
+                  new_name="${filename%.jar}-MC${mc_version}.jar"
+                  cp "$jar" "release-artifacts/$new_name"
+                fi
+              done
+            fi
+          done
+
+          # Fabric (all versions)
+          for version_dir in server/fabric/*/; do
+            if [ -d "$version_dir" ]; then
+              mc_version=$(basename "$version_dir")
+              # Prefer Universal (fat jar) if it exists, otherwise use plain jar
+              jar=""
+              for candidate in "${version_dir}build/libs/MinecraftAuth-Fabric"*.jar; do
+                [ -f "$candidate" ] || continue
+                fname=$(basename "$candidate")
+                [[ "$fname" == *"-dev.jar" ]] && continue
+                [[ "$fname" == *"-sources.jar" ]] && continue
+                if [[ "$fname" == *"Universal"* ]]; then
+                  jar="$candidate"
+                  break
+                elif [ -z "$jar" ]; then
+                  jar="$candidate"
+                fi
+              done
+              if [ -n "$jar" ]; then
+                filename=$(basename "$jar")
+                new_name="${filename%.jar}-MC${mc_version}.jar"
+                cp "$jar" "release-artifacts/$new_name"
+              fi
+            fi
+          done
+
+          # NeoForge (all versions)
+          for version_dir in server/neoforge/*/; do
+            if [ -d "$version_dir" ]; then
+              mc_version=$(basename "$version_dir")
+              for jar in "${version_dir}build/libs/MinecraftAuth-NeoForge"*.jar; do
+                if [ -f "$jar" ]; then
+                  filename=$(basename "$jar")
+                  # Rename to include MC version for clarity
+                  new_name="${filename%.jar}-MC${mc_version}.jar"
+                  cp "$jar" "release-artifacts/$new_name"
+                fi
+              done
+            fi
+          done
+
+          # Velocity
+          cp proxy/velocity/build/libs/MinecraftAuth-Velocity*.jar release-artifacts/ 2>/dev/null || true
+
+          # Remove sources jars from release
+          rm -f release-artifacts/*-sources.jar
+
+          # List all artifacts
+          echo "## Release Artifacts"
+          ls -la release-artifacts/
+
+          # Generate short SHA
+          echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release body
+        id: release_body
+        run: |
+          cat << 'BODY_EOF' > release-body.md
+          ## MinecraftAuthentication Plugin - Latest Build
+
+          This is an automatically updated release built from the latest `devel` branch.
+
+          ### Downloads
+
+          #### Server Plugins
+          | Platform | Supported Versions | File |
+          |----------|--------------------|------|
+          | **Bukkit / Spigot / Paper** | 1.16.5+ | `MinecraftAuth-Bukkit*.jar` |
+
+          #### Forge Mods
+          | Minecraft Version | File |
+          |-------------------|------|
+          | 1.18.2 | `MinecraftAuth-Forge*-MC1.18.2.jar` |
+          | 1.20.1 | `MinecraftAuth-Forge*-MC1.20.1.jar` |
+          | 1.21.1 | `MinecraftAuth-Forge*-MC1.21.1.jar` |
+
+          #### Fabric Mods
+          | Minecraft Version | File |
+          |-------------------|------|
+          | 1.21.1 | `MinecraftAuth-Fabric-Universal*-MC1.21.1.jar` |
+          | 1.21.11 | `MinecraftAuth-Fabric*-MC1.21.11.jar` |
+
+          #### NeoForge Mods
+          | Minecraft Version | File |
+          |-------------------|------|
+          | 1.21.1 | `MinecraftAuth-NeoForge*-MC1.21.1.jar` |
+
+          #### Proxy Plugins
+          | Platform | File |
+          |----------|------|
+          | **Velocity** | `MinecraftAuth-Velocity*.jar` |
+
+          ---
+          > This release is automatically updated on every push to `devel`.
+          BODY_EOF
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Latest Build (${{ steps.prepare.outputs.short_sha }})"
+          body_path: release-body.md
+          prerelease: false
+          make_latest: true
+          files: release-artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update latest tag
+        run: |
+          git tag -f latest HEAD
+          git push -f origin latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

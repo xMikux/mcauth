@@ -1,0 +1,52 @@
+plugins {
+    id 'fabric-loom' version '1.13.6'
+}
+
+version = project.version
+group = "me.minecraftauth"
+archivesBaseName = "${modid}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+compileJava.options.release = 21
+
+loom {
+    mixin {
+        defaultRefmapName = "MinecraftAuth-Fabric-refmap.json"
+    }
+    mods {
+        minecraftauth {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    shaded project(':common')
+    minecraft 'com.mojang:minecraft:1.21.1'
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.16.9'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.116.9+1.21.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    archivesBaseName = 'MinecraftAuth-Fabric'
+}
+
+shadowJar {
+    from zipTree(jar.archiveFile)
+    dependsOn jar
+    archiveClassifier.set('dev')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+remapJar {
+    archivesBaseName = 'MinecraftAuth-Fabric'
+    inputFile = shadowJar.archiveFile
+    dependsOn shadowJar
+}

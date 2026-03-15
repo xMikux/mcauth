@@ -1,3 +1,9 @@
+# Local secrets
+.env
+
+# Claude Code / RTK tool config (local only)
+CLAUDE.md
+
 # User-specific stuff
 **/.idea/
 .vscode/
@@ -15,8 +21,10 @@ out/
 # Compiled class file
 *.class
 
-# Log file
+# Log files
 *.log
+*.log.gz
+logs/
 
 # BlueJ files
 *.ctxt

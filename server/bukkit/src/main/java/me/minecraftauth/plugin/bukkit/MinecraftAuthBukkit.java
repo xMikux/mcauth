@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 MinecraftAuth.me
+ * Copyright 2021-2026 MinecraftAuth.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,11 @@ public final class MinecraftAuthBukkit extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.RED + "Usage: /" + label + " <reload>");
+            return true;
+        }
+
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "reload":
                 if (sender.isOp()) {

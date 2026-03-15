@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "me.minecraftauth.fabric.server.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "MinecraftAuth-Fabric-refmap.json",
+  "server": [
+    "LoginMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
