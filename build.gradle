@@ -63,6 +63,9 @@ subprojects {
         relocate 'com.github.benmanes.caffeine', 'me.minecraftauth.lib.caffeine'
 
         archiveClassifier.set('')
+        // Shadow 9.x no longer inherits archiveBaseName from the jar task.
+        // Wire it lazily so subproject overrides (archiveBaseName = '...') still take precedence.
+        archiveBaseName.convention(jar.archiveBaseName)
     }
 
     task sourcesJar(type: Jar, dependsOn: classes) {
