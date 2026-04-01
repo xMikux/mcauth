@@ -27,13 +27,15 @@
 | Forge 1.21.1 | ❌ | ✅ |
 | Fabric（MC 1.18 – 1.21.1，通用模組） | ❌ | ✅ |
 | Fabric 1.21.11 | ❌ | ✅ |
+| Fabric 26.1 | ❌ | ✅ |
 | NeoForge 1.21.1 | ❌ | ✅ |
 
 ### 功能改進
 
 - **Folia 支援**：改善 Bukkit 模組的執行緒安全性，支援 Folia 伺服器
 - **Bug 修復**：修正 `/minecraftauth` 指令不帶參數時發生的 `ArrayIndexOutOfBoundsException`
-- **Java 21**：將整個專案升級至 Java 21
+- **Java 25**：升級至 Java 25（Minecraft 26.1 / Fabric Loom 1.15+ 的必要條件）
+- **Minecraft 26.1**：新增 Fabric 對非混淆版本 Minecraft 26.1 的支援
 - **精簡專案**：移除 BungeeCord 與 Sponge 模組以降低維護成本
 
 ### E2E 測試基礎設施
@@ -58,8 +60,9 @@ minecraftauthentication/
 │   ├── bukkit/          # Bukkit / Spigot / Paper / Folia
 │   ├── fabric/
 │   │   ├── 1.21.1/      # MC 1.18 – 1.21.1 通用模組
-│   │   └── 1.21.11/     # 因 MC 1.21.11 API 變更獨立出的模組
-│   ├── forge/
+│   │   ├── 1.21.11/     # 因 MC 1.21.11 API 變更獨立出的模組
+│   │   └── 26.1/        # 非混淆版 MC 26.1 獨立模組（需 Java 25）
+│   ├── forge/           # 獨立 Gradle 8.14 子專案（ForgeGradle 6.x）
 │   │   ├── 1.18.2/
 │   │   ├── 1.20.1/
 │   │   └── 1.21.1/
@@ -74,9 +77,19 @@ minecraftauthentication/
 
 ## 建置
 
-需要 Java 21。
+### 環境需求
+
+- **主專案**（Fabric、NeoForge、Bukkit、Velocity）：Java 25
+- **Forge 模組**（`server/forge/`）：Java 21 — ForgeGradle 6.x 需要 Gradle 8.x，與主專案使用的 Gradle 9.x 不相容，因此獨立建置
+
+### 建置指令
 
 ```bash
+# 1. 建置所有模組（Forge 除外，需要 Java 25）
+./gradlew build
+
+# 2. 獨立建置 Forge 模組（需要 Java 21）
+cd server/forge
 ./gradlew build
 ```
 

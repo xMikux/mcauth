@@ -27,13 +27,15 @@ This is a fork of the official plugin for [minecraftauth.me](https://minecraftau
 | Forge 1.21.1 | ❌ | ✅ |
 | Fabric (MC 1.18 – 1.21.1, universal) | ❌ | ✅ |
 | Fabric 1.21.11 | ❌ | ✅ |
+| Fabric 26.1 | ❌ | ✅ |
 | NeoForge 1.21.1 | ❌ | ✅ |
 
 ### Improvements
 
 - **Folia support**: Improved thread safety in the Bukkit module to support Folia servers
 - **Bug fix**: Fixed `ArrayIndexOutOfBoundsException` when running `/minecraftauth` without arguments
-- **Java 21**: Upgraded the entire project to Java 21
+- **Java 25**: Upgraded to Java 25 (required for Minecraft 26.1 / Fabric Loom 1.15+)
+- **Minecraft 26.1**: Added Fabric support for the new non-obfuscated Minecraft 26.1 release
 - **Cleanup**: Removed BungeeCord and Sponge modules to reduce maintenance overhead
 
 ### E2E Testing Infrastructure
@@ -58,8 +60,9 @@ minecraftauthentication/
 │   ├── bukkit/          # Bukkit / Spigot / Paper / Folia
 │   ├── fabric/
 │   │   ├── 1.21.1/      # Universal module for MC 1.18 – 1.21.1
-│   │   └── 1.21.11/     # Separate module for MC 1.21.11 API changes
-│   ├── forge/
+│   │   ├── 1.21.11/     # Separate module for MC 1.21.11 API changes
+│   │   └── 26.1/        # Separate module for non-obfuscated MC 26.1 (Java 25)
+│   ├── forge/           # Standalone Gradle 8.14 project (ForgeGradle 6.x)
 │   │   ├── 1.18.2/
 │   │   ├── 1.20.1/
 │   │   └── 1.21.1/
@@ -74,9 +77,19 @@ minecraftauthentication/
 
 ## Building
 
-Requires Java 21.
+### Requirements
+
+- **Main project** (Fabric, NeoForge, Bukkit, Velocity): Java 25
+- **Forge modules** (`server/forge/`): Java 21 — ForgeGradle 6.x requires Gradle 8.x which is incompatible with the Gradle 9.x used by the rest of the project
+
+### Build Commands
 
 ```bash
+# 1. Build all modules except Forge (requires Java 25)
+./gradlew build
+
+# 2. Build Forge modules separately (requires Java 21)
+cd server/forge
 ./gradlew build
 ```
 
