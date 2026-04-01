@@ -1,0 +1,53 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.16.0-alpha.16'
+}
+
+version = project.version
+group = "me.minecraftauth"
+base { archivesName = "${modid}" }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+compileJava.options.release = 25
+
+loom {
+    mods {
+        minecraftauth {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    shaded project(':common')
+    minecraft 'com.mojang:minecraft:26.1'
+    // WORKAROUND: Fabric Loom 1.15+ in non-remap mode (used for non-obfuscated MC 26.1+)
+    // creates a minecraft-merged.jar that contains only assets, not class files. MC classes
+    // end up only in minecraftNamedRuntime, not on the compile classpath. Loom downloads
+    // minecraft-extracted_server.jar during project configuration, so this path is
+    // guaranteed to exist before compileJava runs. If this path changes in a future Loom
+    // version, update the version segment ("26.1") accordingly.
+    compileOnly files("${gradle.gradleUserHomeDir}/caches/fabric-loom/26.1/minecraft-extracted_server.jar")
+    testCompileOnly files("${gradle.gradleUserHomeDir}/caches/fabric-loom/26.1/minecraft-extracted_server.jar")
+    testRuntimeOnly files("${gradle.gradleUserHomeDir}/caches/fabric-loom/26.1/minecraft-extracted_server.jar")
+    implementation 'net.fabricmc:fabric-loader:0.18.5'
+    implementation 'net.fabricmc.fabric-api:fabric-api:0.144.4+26.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    archiveBaseName = 'MinecraftAuth-Fabric'
+    archiveClassifier.set('dev')
+}
+
+shadowJar {
+    archiveBaseName = 'MinecraftAuth-Fabric'
+    from zipTree(jar.archiveFile)
+    dependsOn jar
+    archiveClassifier.set('')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

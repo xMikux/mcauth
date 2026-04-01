@@ -43,7 +43,8 @@ test {
     dependsOn ':proxy:velocity:shadowJar'
     dependsOn ':server:fabric:1.21.1:remapJar'
     dependsOn ':server:fabric:1.21.11:remapJar'
-    dependsOn ':server:forge:1.21.1:shadowJar'
+    dependsOn ':server:fabric:26.1:shadowJar'
+    // server:forge:1.21.1 is temporarily disabled (ForgeGradle 6.x is incompatible with Gradle 9)
     dependsOn ':server:neoforge:1.21.1:shadowJar'
 
     // Pass the project build directory to tests so they can find the jars

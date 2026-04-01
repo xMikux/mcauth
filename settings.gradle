@@ -16,12 +16,17 @@ pluginManagement {
     }
 }
 
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
 rootProject.name = 'MinecraftAuthentication-Plugin'
 
 include 'common'
 include 'server:bukkit'
-include 'server:forge:1.18.2', 'server:forge:1.20.1', 'server:forge:1.21.1'
-include 'server:fabric:1.21.1', 'server:fabric:1.21.11'
+// ForgeGradle 6.x does not support Gradle 9.x (required for MC 26.1 / Fabric Loom 1.15+).
+// These modules need ForgeGradle to be upgraded to 7.x before they can build with Gradle 9.
+// include 'server:forge:1.18.2', 'server:forge:1.20.1', 'server:forge:1.21.1'
+include 'server:fabric:1.21.1', 'server:fabric:1.21.11', 'server:fabric:26.1'
 include 'server:neoforge:1.21.1'
 include 'proxy:velocity'
 include 'test-server-runner'

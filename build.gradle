@@ -1,7 +1,7 @@
 plugins {
-    id 'io.freefair.lombok' version '8.11'
-    id 'com.gradleup.shadow' version '8.3.5'
-    id 'org.cadixdev.licenser' version '0.6.1'
+    id 'io.freefair.lombok' version '9.2.0'
+    id 'com.gradleup.shadow' version '9.4.1'
+//    id 'org.cadixdev.licenser' version '0.6.1'
 }
 
 version = '1.0-SNAPSHOT'
@@ -12,10 +12,12 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'io.freefair.lombok'
     apply plugin: 'com.gradleup.shadow'
-    apply plugin: 'org.cadixdev.licenser'
+    // apply plugin: 'org.cadixdev.licenser'
 
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
     tasks.configureEach {
         if (name == 'generateLombokConfig') {
@@ -50,7 +52,7 @@ subprojects {
 
     jar {
         // avoid needing to run licenseFormat & shadowJar when building
-        dependsOn licenseFormat
+        // dependsOn licenseFormat
         finalizedBy shadowJar
     }
 
@@ -80,13 +82,5 @@ subprojects {
 //        archives javadocJar
 //    }
 
-    license {
-        header = rootProject.file('LICENSE_HEADER')
-        properties {
-            String inception = '2021'
-            String currentYear = Calendar.getInstance().get(Calendar.YEAR)
-            year = inception == currentYear ? currentYear : inception + '-' + currentYear
-        }
-        include '**/*.java' // only java files
-    }
+
 }

@@ -31,12 +31,17 @@ import java.util.stream.Stream;
 public class FabricServerTest extends BaseServerTest {
 
     static Stream<Arguments> fabricVersions() {
+        // modulePath points to the built JAR used for each MC version.
+        // The 1.21.1 JAR is intentionally reused for 1.18.2–1.21.1: Fabric's
+        // cross-version compatibility allows one mod JAR to target a wide MC range.
+        // 1.21.11 and 26.1 require separate builds due to breaking Fabric API changes.
         return Stream.of(
             Arguments.of("1.18.2",  758, "server/fabric/1.21.1"),
             Arguments.of("1.19.4",  762, "server/fabric/1.21.1"),
             Arguments.of("1.20.6",  766, "server/fabric/1.21.1"),
             Arguments.of("1.21.1",  767, "server/fabric/1.21.1"),
-            Arguments.of("1.21.11", 774, "server/fabric/1.21.11")
+            Arguments.of("1.21.11", 774, "server/fabric/1.21.11"),
+            Arguments.of("26.1",    775, "server/fabric/26.1")
         );
     }
 

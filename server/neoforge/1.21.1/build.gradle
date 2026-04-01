@@ -4,11 +4,13 @@ plugins {
 
 version = "1.21.1"
 group = "me.minecraftauth"
-archivesBaseName = "MinecraftAuth-NeoForge"
+base { archivesName = "MinecraftAuth-NeoForge" }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 neoForge {

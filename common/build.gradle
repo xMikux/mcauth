@@ -23,7 +23,7 @@ dependencies {
 }
 
 jar {
-    archivesBaseName = 'MinecraftAuth-Common'
+    archiveBaseName = 'MinecraftAuth-Common'
 }
 
 shadowJar {

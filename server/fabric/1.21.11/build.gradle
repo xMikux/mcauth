@@ -4,7 +4,7 @@ plugins {
 
 version = project.version
 group = "me.minecraftauth"
-archivesBaseName = "${modid}"
+base { archivesName = "${modid}" }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 compileJava.options.release = 21
@@ -35,7 +35,7 @@ test {
 }
 
 jar {
-    archivesBaseName = 'MinecraftAuth-Fabric'
+    archiveBaseName = 'MinecraftAuth-Fabric'
 }
 
 shadowJar {
@@ -46,7 +46,7 @@ shadowJar {
 }
 
 remapJar {
-    archivesBaseName = 'MinecraftAuth-Fabric'
+    archiveBaseName = 'MinecraftAuth-Fabric'
     inputFile = shadowJar.archiveFile
     dependsOn shadowJar
 }

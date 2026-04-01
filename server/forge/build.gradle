@@ -1,0 +1,69 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.gradleup.shadow'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    // Suppress lombok config generation (not used by forge modules).
+    tasks.configureEach {
+        if (name == 'generateLombokConfig') {
+            enabled = false
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://nexus.scarsz.me/content/groups/public/' }
+    }
+
+    configurations {
+        shaded
+        implementation.extendsFrom(shaded)
+    }
+
+    dependencies {
+        // Use the regular (non-shadow) common JAR so source code can reference
+        // original package names (e.g. github.scarsz.configuralize).
+        // Shadow will relocate them in the final output JAR.
+        // Build prerequisite: ./gradlew :common:jar in the main project.
+        def commonJar = rootProject.file("../../common/build/libs/MinecraftAuth-Common.jar")
+        if (!commonJar.exists()) {
+            throw new GradleException(
+                "common JAR not found at ${commonJar}.\n" +
+                "Run './gradlew :common:jar' from the main project first."
+            )
+        }
+        shaded files(commonJar)
+
+        // Common's shaded transitive deps — same versions as common/build.gradle.
+        shaded 'me.minecraftauth:lib:1.1.1'
+        shaded 'github.scarsz:configuralize:1.4.0'
+        //noinspection GradlePackageUpdate caffeine 3.x doesn't support JDK 8
+        shaded 'com.github.ben-manes.caffeine:caffeine:2.9.3'
+        shaded 'com.udojava:EvalEx:2.7'
+
+        // Lombok annotation processor (used by common and some forge modules).
+        compileOnly 'org.projectlombok:lombok:1.18.36'
+        annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    }
+
+    shadowJar {
+        archiveBaseName = 'MinecraftAuth-Forge'
+        configurations = [project.configurations.shaded]
+        relocate 'github.scarsz.configuralize', 'me.minecraftauth.config'
+        relocate 'com.udojava.evalex', 'me.minecraftauth.lib.evalex'
+        relocate 'com.github.benmanes.caffeine', 'me.minecraftauth.lib.caffeine'
+        archiveClassifier.set('')
+    }
+
+    jar {
+        finalizedBy shadowJar
+    }
+}

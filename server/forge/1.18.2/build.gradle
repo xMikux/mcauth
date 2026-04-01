@@ -17,7 +17,7 @@ plugins {
 
 version = "1.18.2"
 group = "me.minecraftauth"
-archivesBaseName = "${modid}"
+base { archivesName = "${modid}" }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 sourceCompatibility = JavaVersion.VERSION_21
@@ -36,7 +36,7 @@ minecraft {
             properties 'mixin.env.remapRefMap': 'true'
             property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
             workingDirectory project.file('run')
-            arg "-mixin.config="+archivesBaseName+".mixins.json"
+            arg "-mixin.config=${modid}.mixins.json"
 
             property 'forge.logging.console.level', 'debug'
 
@@ -54,7 +54,6 @@ repositories{
 }
 
 dependencies {
-    shaded project(':common')
     minecraft 'net.minecraftforge:forge:1.18.2-40.1.21'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
@@ -64,7 +63,7 @@ sourceSets {
 }
 
 jar {
-    archivesBaseName = 'MinecraftAuth-Forge'
+    archiveBaseName = 'MinecraftAuth-Forge'
 
     manifest {
         attributes([

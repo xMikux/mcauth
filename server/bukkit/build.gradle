@@ -13,7 +13,7 @@ dependencies {
 }
 
 jar {
-    archivesBaseName = 'MinecraftAuth-Bukkit'
+    archiveBaseName = 'MinecraftAuth-Bukkit'
 }
 
 processResources {

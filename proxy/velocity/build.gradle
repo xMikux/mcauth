@@ -16,5 +16,5 @@ dependencies {
 }
 
 jar {
-    archivesBaseName = 'MinecraftAuth-Velocity'
+    archiveBaseName = 'MinecraftAuth-Velocity'
 }
