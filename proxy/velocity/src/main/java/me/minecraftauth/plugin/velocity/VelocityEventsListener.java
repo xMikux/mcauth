@@ -44,7 +44,7 @@ public class VelocityEventsListener {
             });
         } catch (LookupException e) {
             event.setResult(ResultedEvent.ComponentResult.denied(Component.text("Unable to verify linked account").color(NamedTextColor.RED)));
-            e.printStackTrace();
+            MinecraftAuthVelocity.getInstance().getService().getLogger().error("Failed to verify linked account for " + event.getPlayer().getUsername(), e);
         }
     }
 
@@ -66,7 +66,7 @@ public class VelocityEventsListener {
         } catch (LookupException e) {
             event.setResult(ServerPreConnectEvent.ServerResult.denied());
             event.getPlayer().sendMessage(Component.text("Unable to verify linked account").color(NamedTextColor.RED));
-            e.printStackTrace();
+            MinecraftAuthVelocity.getInstance().getService().getLogger().error("Failed to verify linked account for " + event.getPlayer().getUsername() + " connecting to " + event.getOriginalServer().getServerInfo().getName(), e);
         }
     }
 

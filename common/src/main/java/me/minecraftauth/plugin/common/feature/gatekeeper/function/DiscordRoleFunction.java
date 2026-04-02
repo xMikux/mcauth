@@ -41,7 +41,7 @@ public class DiscordRoleFunction extends AbstractFunction {
             try {
                 return AuthService.isDiscordRolePresent(getGatekeeper().getService().getServerToken(), getAccount().getUUID(), role) ? TRUE : FALSE;
             } catch (LookupException e) {
-                e.printStackTrace();
+                logError("Failed to check " + getClass().getSimpleName(), e);
                 return FALSE;
             }
         });

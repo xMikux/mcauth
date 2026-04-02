@@ -65,6 +65,10 @@ public abstract class AbstractFunction extends AbstractLazyFunction {
         this.accountSupplier = accountSupplier;
     }
 
+    protected void logError(String message, Throwable t) {
+        getGatekeeper().getService().getLogger().error(message, t);
+    }
+
     Expression.LazyNumber cache(String function, String account, String data, Supplier<Expression.LazyNumber> compute) {
         return VALUE_CACHE.get(function + "." + account + (data != null ? "." + data : ""), s -> compute.get());
     }

@@ -28,6 +28,8 @@ import java.io.IOException;
 
 public class Command {
 
+    private static final org.apache.logging.log4j.Logger LOGGER = MinecraftAuthMod.getLogger();
+
     // Cache the sendSuccess Method — Supplier<Component> overload (1.20.1+) or Component overload (pre-1.20.1)
     private static final java.lang.reflect.Method SEND_SUCCESS_METHOD;
     private static final boolean MODERN_SEND_SUCCESS;
@@ -73,10 +75,10 @@ public class Command {
             return 1;
         } catch (IOException e) {
             source.sendFailure(ComponentHelper.literal("IO exception while reading config: " + e.getMessage()).withStyle(ChatFormatting.RED));
-            e.printStackTrace();
+            LOGGER.error("IO exception during config reload", e);
         } catch (ParseException e) {
             source.sendFailure(ComponentHelper.literal("Exception while parsing config: " + e.getMessage()).withStyle(ChatFormatting.RED));
-            e.printStackTrace();
+            LOGGER.error("Parse exception during config reload", e);
         }
         return -1;
     }

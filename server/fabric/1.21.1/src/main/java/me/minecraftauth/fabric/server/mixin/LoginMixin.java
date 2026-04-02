@@ -35,6 +35,8 @@ import java.net.SocketAddress;
 @Mixin(PlayerList.class)
 public abstract class LoginMixin {
 
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger(LoginMixin.class);
+
     @Inject(at = @At("RETURN"), method = "canPlayerLogin", cancellable = true)
     private void init(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Component> returnedMessage) {
         if (returnedMessage.getReturnValue() == null) {
@@ -52,7 +54,7 @@ public abstract class LoginMixin {
                 });
             } catch (LookupException e) {
                 returnedMessage.setReturnValue(errorComponent("Unable to verify linked account"));
-                e.printStackTrace();
+                LOGGER.error("Failed to verify linked account during login", e);
             }
         }
     }

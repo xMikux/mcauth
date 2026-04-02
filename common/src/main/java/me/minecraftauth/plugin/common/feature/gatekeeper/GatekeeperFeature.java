@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 public class GatekeeperFeature extends Feature {
 
     @Getter private final AuthenticationService service;
-    @Getter private final Map<String, Realm> realms = new ConcurrentHashMap<>();
+    @Getter private volatile Map<String, Realm> realms = Collections.emptyMap();
 
     @Getter private final Set<AbstractFunction> functions = new HashSet<>();
     @Getter private final Set<Operator> operators = new HashSet<>();
@@ -113,20 +113,22 @@ public class GatekeeperFeature extends Feature {
 
     @Override
     public void reload() {
-        realms.clear();
+        Map<String, Realm> newRealms = new ConcurrentHashMap<>();
 
         Realm superRealm = new Realm(this, service.getConfig().dget("Gatekeeper"), null);
         if (!superRealm.getExpressions().isEmpty()) {
-            realms.put("", superRealm);
+            newRealms.put("", superRealm);
         }
 
         Dynamic serversDynamic = service.getConfig().dgetSilent("Gatekeeper.Servers");
         if (serversDynamic.isPresent()) {
             serversDynamic.children().forEach(child -> {
                 String server = child.key().convert().intoString();
-                realms.put(server, new Realm(this, child, server));
+                newRealms.put(server, new Realm(this, child, server));
             });
         }
+
+        this.realms = Collections.unmodifiableMap(newRealms);
 
         boolean onlySuper = realms.isEmpty() || (realms.size() == 1 && realms.containsKey(""));
         int expressionCount = realms.values().stream().mapToInt(realm -> realm.getExpressions().size()).sum();

@@ -37,7 +37,7 @@ public class YouTubeSubscriberFunction extends AbstractFunction {
             try {
                 return AuthService.isSubscribedYouTube(getGatekeeper().getService().getServerToken(), getAccount().getUUID()) ? TRUE : FALSE;
             } catch (LookupException e) {
-                e.printStackTrace();
+                logError("Failed to check " + getClass().getSimpleName(), e);
                 return FALSE;
             }
         });

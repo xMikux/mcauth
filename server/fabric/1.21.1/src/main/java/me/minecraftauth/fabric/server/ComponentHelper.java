@@ -31,6 +31,8 @@ import java.lang.reflect.Method;
  */
 public final class ComponentHelper {
 
+    private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger(ComponentHelper.class);
+
     private static final Method COMPONENT_LITERAL;
     private static final Constructor<?> TEXT_COMPONENT_CTOR;
 
@@ -44,7 +46,7 @@ public final class ComponentHelper {
                 ctor = Class.forName("net.minecraft.network.chat.TextComponent")
                         .getConstructor(String.class);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOGGER.error("Failed to resolve Component.literal or TextComponent constructor", ex);
             }
         }
         COMPONENT_LITERAL = literal;
@@ -61,7 +63,7 @@ public final class ComponentHelper {
                 return (MutableComponent) TEXT_COMPONENT_CTOR.newInstance(text);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Failed to create text Component", ex);
         }
         // Last-resort fallback — should never be reached on supported versions
         return Component.literal(text);

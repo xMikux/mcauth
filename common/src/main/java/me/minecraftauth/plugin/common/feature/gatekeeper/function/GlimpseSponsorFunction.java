@@ -39,7 +39,7 @@ public class GlimpseSponsorFunction extends AbstractFunction {
             try {
                 return AuthService.isSubscribedGlimpse(getGatekeeper().getService().getServerToken(), getAccount().getUUID(), levelName) ? TRUE : FALSE;
             } catch (LookupException e) {
-                e.printStackTrace();
+                logError("Failed to check " + getClass().getSimpleName(), e);
                 return FALSE;
             }
         });

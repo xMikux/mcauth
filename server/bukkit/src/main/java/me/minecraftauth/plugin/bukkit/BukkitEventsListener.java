@@ -38,7 +38,7 @@ public class BukkitEventsListener implements Listener {
             });
         } catch (LookupException e) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, ChatColor.RED + "Unable to verify linked account");
-            e.printStackTrace();
+            MinecraftAuthBukkit.getInstance().getService().getLogger().error("Failed to verify linked account for " + event.getName(), e);
         }
     }
 

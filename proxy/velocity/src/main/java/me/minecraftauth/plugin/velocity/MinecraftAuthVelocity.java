@@ -65,7 +65,7 @@ public class MinecraftAuthVelocity {
             config.saveAllDefaults();
             config.loadAll();
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            logger.error("Failed to load config", e);
             return;
         }
 
@@ -75,7 +75,7 @@ public class MinecraftAuthVelocity {
                     .withLogger(new VelocityLogger(config, logger))
                     .build();
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            logger.error("Failed to initialize AuthenticationService", e);
             return;
         }
 

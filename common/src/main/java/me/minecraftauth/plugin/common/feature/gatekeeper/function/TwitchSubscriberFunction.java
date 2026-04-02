@@ -42,7 +42,7 @@ public class TwitchSubscriberFunction extends AbstractFunction {
             try {
                 return AuthService.isSubscribedTwitch(getGatekeeper().getService().getServerToken(), getAccount().getUUID(), tier) ? TRUE : FALSE;
             } catch (LookupException e) {
-                e.printStackTrace();
+                logError("Failed to check " + getClass().getSimpleName(), e);
                 return FALSE;
             }
         });

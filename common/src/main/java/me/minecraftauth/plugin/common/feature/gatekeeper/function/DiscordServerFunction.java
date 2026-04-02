@@ -41,7 +41,7 @@ public class DiscordServerFunction extends AbstractFunction {
             try {
                 return AuthService.isDiscordMemberPresent(getGatekeeper().getService().getServerToken(), getAccount().getUUID(), server) ? TRUE : FALSE;
             } catch (LookupException e) {
-                e.printStackTrace();
+                logError("Failed to check " + getClass().getSimpleName(), e);
                 return FALSE;
             }
         });

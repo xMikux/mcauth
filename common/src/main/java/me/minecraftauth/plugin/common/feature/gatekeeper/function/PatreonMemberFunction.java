@@ -39,7 +39,7 @@ public class PatreonMemberFunction extends AbstractFunction {
             try {
                 return AuthService.isSubscribedPatreon(getGatekeeper().getService().getServerToken(), getAccount().getUUID(), tier) ? TRUE : FALSE;
             } catch (LookupException e) {
-                e.printStackTrace();
+                logError("Failed to check " + getClass().getSimpleName(), e);
                 return FALSE;
             }
         });

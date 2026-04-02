@@ -29,6 +29,8 @@ import java.io.IOException;
 
 public class Command {
 
+    private static final org.apache.logging.log4j.Logger LOGGER = MinecraftAuthMod.getLogger();
+
     public Command(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("minecraftauth")
                 .then(Commands.literal("reload")
@@ -45,10 +47,10 @@ public class Command {
             return 1;
         } catch (IOException e) {
             source.sendFailure(Component.literal("IO exception while reading config: " + e.getMessage()).withStyle(ChatFormatting.RED));
-            e.printStackTrace();
+            LOGGER.error("IO exception during config reload", e);
         } catch (ParseException e) {
             source.sendFailure(Component.literal("Exception while parsing config: " + e.getMessage()).withStyle(ChatFormatting.RED));
-            e.printStackTrace();
+            LOGGER.error("Parse exception during config reload", e);
         }
         return -1;
     }

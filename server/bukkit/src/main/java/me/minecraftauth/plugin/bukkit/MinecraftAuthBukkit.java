@@ -29,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.logging.Level;
 
 public final class MinecraftAuthBukkit extends JavaPlugin {
 
@@ -45,7 +46,7 @@ public final class MinecraftAuthBukkit extends JavaPlugin {
             config.saveAllDefaults();
             config.loadAll();
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            getLogger().log(Level.SEVERE, "Failed to load config", e);
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -56,7 +57,7 @@ public final class MinecraftAuthBukkit extends JavaPlugin {
                     .withLogger(new BukkitLogger(config, getLogger()))
                     .build();
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            getLogger().log(Level.SEVERE, "Failed to initialize AuthenticationService", e);
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -80,11 +81,11 @@ public final class MinecraftAuthBukkit extends JavaPlugin {
                         sender.sendMessage("MinecraftAuth config reloaded");
                     } catch (IOException e) {
                         sender.sendMessage("IO exception while reading config: " + e.getMessage());
-                        e.printStackTrace();
+                        getLogger().log(Level.SEVERE, "IO exception during config reload", e);
                     } catch (ParseException e) {
                         sender.sendMessage("Exception while parsing config:");
                         for (String line : e.getMessage().split("\n")) sender.sendMessage(line);
-                        e.printStackTrace();
+                        getLogger().log(Level.SEVERE, "Parse exception during config reload", e);
                     }
                 } else {
                     sender.sendMessage(ChatColor.RED + "Server operator-only command");

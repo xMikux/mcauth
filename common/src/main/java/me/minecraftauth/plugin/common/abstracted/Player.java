@@ -46,4 +46,9 @@ public abstract class Player {
         return getUUID().equals(((Player) obj).getUUID());
     }
 
+    @Override
+    public int hashCode() {
+        return getUUID().hashCode();
+    }
+
 }

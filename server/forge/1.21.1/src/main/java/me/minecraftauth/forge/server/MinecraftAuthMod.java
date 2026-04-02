@@ -50,7 +50,7 @@ public class MinecraftAuthMod {
             config.saveAllDefaults();
             config.loadAll();
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            logger.error("Failed to load config", e);
             return;
         }
 
@@ -60,7 +60,7 @@ public class MinecraftAuthMod {
                     .withLogger(new Log4jLogger(logger))
                     .build();
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            logger.error("Failed to initialize AuthenticationService", e);
         }
     }
 
