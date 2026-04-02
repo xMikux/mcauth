@@ -53,9 +53,16 @@ subprojects {
 
     shadowJar {
         configurations = [project.configurations.shaded]
+        // Relocate all shaded libraries to avoid split package issues in modern mod launchers (ModLauncher / NeoForge / Forge)
         relocate 'github.scarsz.configuralize', 'me.minecraftauth.config'
         relocate 'com.udojava.evalex', 'me.minecraftauth.lib.evalex'
         relocate 'com.github.benmanes.caffeine', 'me.minecraftauth.lib.caffeine'
+        relocate 'org.yaml.snakeyaml', 'me.minecraftauth.lib.yaml'
+        relocate 'org.json.simple', 'me.minecraftauth.lib.json'
+        relocate 'com.github.kevinsawicki.http', 'me.minecraftauth.lib.http'
+        relocate 'com.github.alexheretic', 'me.minecraftauth.lib.alexheretic'
+        relocate 'org.checkerframework', 'me.minecraftauth.lib.checker'
+        relocate 'com.google.errorprone', 'me.minecraftauth.lib.errorprone'
 
         archiveClassifier.set('')
         // Shadow 9.x no longer inherits archiveBaseName from the jar task.
